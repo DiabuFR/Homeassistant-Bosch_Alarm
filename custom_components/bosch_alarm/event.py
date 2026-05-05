@@ -39,12 +39,12 @@ class BoschHistoryEventEntity(EventEntity):
         # Track the last processed timestamp to avoid duplicates
         self._last_event_time = None
 
-    async def async_added_to_hass(self):
+    async def async_added_to_hass(self) -> None:
         """Subscribe to panel history updates."""
         # The library uses a standard observer pattern
         self._panel.history_observer.attach(self._handle_new_event)
 
-    async def async_will_remove_from_hass(self):
+    async def async_will_remove_from_hass(self) -> None:
         """Unsubscribe when entity is removed."""
         self._panel.history_observer.detach(self._handle_new_event)
 
@@ -67,9 +67,9 @@ class BoschHistoryEventEntity(EventEntity):
             "history_event",
             {
                 "timestamp": event_time,
-                "event_code": last_event.event_code,
-                "description": last_event.event_text,
-                "area": last_event.area
+                #"event_code": last_event.event_code,
+                "description": last_event.message,
+                #"area": last_event.area
             }
         )
         self.async_write_ha_state()
