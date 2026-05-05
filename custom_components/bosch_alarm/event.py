@@ -33,6 +33,8 @@ class BoschHistoryEventEntity(EventEntity):
         self._attr_unique_id = f"{entry.entry_id}_history"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
+            name=f"Bosch {panel.model.name} Events",
+            manufacturer="Bosch Security Systems",
         )
         # Track the last processed timestamp to avoid duplicates
         self._last_event_time = None
