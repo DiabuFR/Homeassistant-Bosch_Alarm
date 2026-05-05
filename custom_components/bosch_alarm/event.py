@@ -26,7 +26,7 @@ class BoschHistoryEventEntity(EventEntity):
 
     _attr_icon = "mdi:clipboard-text-clock"
     _attr_device_class = None
-    _attr_event_types = ["history_event"]
+    _attr_event_types = ["history", "alarm", "trouble", "arming", "disarming"]
     _attr_has_entity_name = True
     _attr_translation_key = "history_log"
 
@@ -99,4 +99,4 @@ def _map_summary_to_type(summary):
         return "disarming"
     if "fault" in summary or "trouble" in summary:
         return "trouble"
-    return "history_event"
+    return "history"
