@@ -66,21 +66,6 @@
           "on": "Ready"
         }
       },
-      "event": {
-        "history_log": {
-          "name": "History log",
-          "state_attributes": {
-            "event_type": {
-              "state": {
-                "history_event": "Panel event",
-                  "alarm_event": "Alarm triggered",
-                  "trouble_event": "System trouble",
-                  "access_event": "Access granted"
-              }
-            }
-          }
-        }
-      },
       "panel_fault_ac_fail": {
         "name": "AC failure"
       },
@@ -110,6 +95,22 @@
       },
       "panel_fault_user_code_tamper_since_rps_hang_up": {
         "name": "User code tamper since last RPS connection"
+      }
+    },
+    "event": {
+      "history_log": {
+        "name": "History log",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "history": "Panel",
+              "alarm": "Alarm Triggered",
+              "trouble": "Trouble",
+              "arming": "System Armed",
+              "disarming": "System Disarmed"
+            }
+          }
+        }
       }
     },
     "sensor": {

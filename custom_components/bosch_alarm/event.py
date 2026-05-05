@@ -7,6 +7,9 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from . import BoschAlarmConfigEntry
 from .const import DOMAIN
 
+import re
+
+B_G_Event_RE = re.compile(r"(\w+(?:\s\w+)*):\s(\d+)")
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -17,7 +20,6 @@ async def async_setup_entry(
     # Official integration uses runtime_data to store the panel object
     panel = config_entry.runtime_data
     async_add_entities([BoschHistoryEventEntity(panel, config_entry)])
-
 
 class BoschHistoryEventEntity(EventEntity):
     """Representation of a Bosch Alarm History Event."""
@@ -62,14 +64,39 @@ class BoschHistoryEventEntity(EventEntity):
 
         self._last_event_time = event_time
 
+        # Extract info from string
+        # FIXME support other models
+        msg = last_event.message
+
+        event_summary = msg.split(",", 1)[0].strip()
+        extracted_values = {match.group(1): int(match.group(2)) for match in B_G_Event_RE.finditer(last_event.message)}
+
+        ha_event_type = _map_summary_to_type(event_summary)
+
         # Trigger the HA Event Sensor
         self._trigger_event(
-            "history_event",
+            ha_event_type,
             {
                 "timestamp": event_time,
-                #"event_code": last_event.event_code,
-                "description": last_event.message,
-                #"area": last_event.area
+                "raw": last_event.message,
+                "type": event_summary,
+                "area_id": extracted_values.get("Area"),
+                "user_id": extracted_values.get("User ID"),
+                "arm_state": extracted_values.get("Arm State"),
+                "is_system_generated": extracted_values.get("User ID") == 65535
             }
         )
         self.async_write_ha_state()
+
+def _map_summary_to_type(summary):
+    """Maps the extracted header to one of our defined event_types."""
+    summary = summary.lower()
+    if "alarm" in summary:
+        return "alarm"
+    if "closing" in summary or "armed" in summary:
+        return "arming"
+    if "opening" in summary or "disarmed" in summary:
+        return "disarming"
+    if "fault" in summary or "trouble" in summary:
+        return "trouble"
+    return "history_event"
