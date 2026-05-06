@@ -39,7 +39,7 @@ class BoschHistoryEventEntity(EventEntity):
             manufacturer="Bosch Security Systems",
         )
         # Track the last processed timestamp to avoid duplicates
-        self._last_event_time = None
+        self._last_event_id = None
 
     async def async_added_to_hass(self) -> None:
         """Subscribe to panel history updates."""
@@ -57,12 +57,12 @@ class BoschHistoryEventEntity(EventEntity):
 
         last_event = self._panel.events[-1]
 
-        # Verify this is a new event based on the timestamp
-        event_time = last_event.date.isoformat()
-        if event_time == self._last_event_time:
+        # Verify this is a new event based on the event_id
+        event_id = last_event.id
+        if event_id == self._last_event_id:
             return
 
-        self._last_event_time = event_time
+        self._last_event_id = event_id
 
         # Extract info from string
         # FIXME support other models
@@ -77,7 +77,8 @@ class BoschHistoryEventEntity(EventEntity):
         self._trigger_event(
             ha_event_type,
             {
-                "timestamp": event_time,
+                "event_id": event_id,
+                "timestamp": last_event.date.isoformat(),
                 "raw": last_event.message,
                 "type": event_summary,
                 "area_id": extracted_values.get("Area"),
